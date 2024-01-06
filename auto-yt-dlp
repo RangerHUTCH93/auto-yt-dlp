@@ -1,0 +1,82 @@
+#!/bin/bash
+
+###############################################
+# Color options ##                            #
+##################                            #
+#                                             #
+# Example; printf "${RED}hello${NC} world!"   #       
+RED='\033[0;31m'                              #
+CYAN='\033[0;36m'                             #
+YELLOW='\033[0;33m'                           # 
+MAGENTA='\033[0;35m'          #################
+ENDCOLOR='\e[0m' # No color ######
+################################
+##############################
+
+echo -e "${CYAN}       _            _ _       ${ENDCOLOR}";
+echo -e "${CYAN} _   _| |_       __| | |_ __  ${ENDCOLOR}";
+echo -e "${CYAN}| | | | __|____ / _  | | '_ \ ${ENDCOLOR}";
+echo -e "${CYAN}| |_| | ||_____| (_| | | |_) |${ENDCOLOR}";
+echo -e "${CYAN} \__, |\__|     \__,_|_| .__/ ${ENDCOLOR}";
+echo -e "${CYAN} |___/                 |_|    ${ENDCOLOR}";
+
+echo
+echo -e ${RED}Current dir:${ENDCOLOR} ${YELLOW}$PWD${ENDCOLOR}
+echo
+# The code below shows the disk space of the file system of the $PWD.
+# It takes into account the hard drive the $PWD is on.
+current_dir=$(pwd)
+df -T -h "$current_dir"
+echo -e "                                     ${CYAN} ## ${ENDCOLOR}"
+echo -e "                                     ${CYAN} ## ${ENDCOLOR}"
+echo -e "1.) Download a video/short           ${CYAN} ## ${ENDCOLOR}"
+echo -e "2.) Download audio (single file)     ${CYAN} ## ${ENDCOLOR}" 
+echo -e "3.) Download an audio album          ${CYAN} ## ${ENDCOLOR}"
+echo -e "4.) ${MAGENTA}Update                           ${CYAN} ## ${ENDCOLOR}"
+echo -e "5.) Download video playlist          ${CYAN} ## ${ENDCOLOR}"
+echo -e "                                     ${CYAN} ## ${ENDCOLOR}"   
+echo -e "Press ctrl+c to exit.                ${CYAN} ## ${ENDCOLOR}"
+echo -e "                                     ${CYAN} ## ${ENDCOLOR}"
+echo -e "${CYAN}########################################${ENDCOLOR}"
+echo
+read -n1 -p "Please select an option: " varUserInput
+echo
+
+case $varUserInput in
+    1*) # Download a video/short
+        read -p "Please paste your URL: " url0
+        echo
+        echo -e "${CYAN}Saving content to:${ENDCOLOR} ${YELLOW}$PWD${ENDCOLOR}"
+        echo
+        yt-dlp.sh -q --progress " $url0"
+        ;;
+    2*) # Download audio (single file)
+        read -p "Please paste your URL: " url0
+        echo
+        echo -e "${CYAN}Saving content to:${ENDCOLOR} ${YELLOW}$PWD${ENDCOLOR}"
+        echo
+        yt-dlp.sh -q --progress --extract-audio --audio-format mp3 " $url0"
+        ;;
+    3*) # Download an audio album
+        read -p "Please paste your playlist URL (audio only): " url0
+        echo
+        echo -e "${CYAN}Saving content to:${ENDCOLOR} ${YELLOW}$PWD${ENDCOLOR}"
+        echo
+        yt-dlp.sh -q --progress --extract-audio --audio-format mp3 -i -o "%(playlist_index)s-%(title)s.%(ext)s" " $url0"
+        ;;
+    4*) # Update
+	if yt-dlp.sh --update; then
+	    exit 0
+	else
+	    cd ~/bin/yt-dlp # git repo (local)
+	    git pull https://github.com/yt-dlp/yt-dlp.git # git repo (remote)
+	fi
+        ;;
+    5*) # Download video playlist
+        read -p "Please paste your playlist URL: " url0
+        echo
+        echo -e "${CYAN}Saving content to:${ENDCOLOR} ${YELLOW}$PWD${ENDCOLOR}"
+        echo
+        yt-dlp.sh -q --progress -i -o "%(playlist_index)s-%(title)s.%(ext)s" " $url0"
+        ;;
+esac
