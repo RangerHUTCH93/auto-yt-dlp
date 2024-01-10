@@ -1,0 +1,116 @@
+#!/bin/bash
+
+###############################################
+# Color options ##                            #
+##################                            #
+#                                             #
+# Example; printf "${RED}hello${NC} world!"   #       
+RED='\033[0;31m'                              #
+CYAN='\033[0;36m'                             #
+YELLOW='\033[0;33m'                           # 
+MAGENTA='\033[0;35m'          #################
+ENDCOLOR='\e[0m' # No color ######
+################################
+##############################
+
+echo -e "${CYAN}       _            _ _       ${ENDCOLOR}";
+echo -e "${CYAN} _   _| |_       __| | |_ __  ${ENDCOLOR}";
+echo -e "${CYAN}| | | | __|____ / _  | | '_ \ ${ENDCOLOR}";
+echo -e "${CYAN}| |_| | ||_____| (_| | | |_) |${ENDCOLOR}";
+echo -e "${CYAN} \__, |\__|     \__,_|_| .__/ ${ENDCOLOR}";
+echo -e "${CYAN} |___/                 |_|    ${ENDCOLOR}";
+
+echo "Multi-media, multi-site... Works best with LAN cable."
+
+echo
+echo -e ${RED}Current dir:${ENDCOLOR} ${YELLOW}$PWD${ENDCOLOR}
+echo
+# The code below shows the disk space of the file system of the $PWD.
+# It takes into account the hard drive the $PWD is on.
+current_dir=$(pwd)
+df -T -h "$current_dir"
+echo -e "                                     ${CYAN} ## ${ENDCOLOR}"
+echo -e "1.) Video/short                      ${CYAN} ## ${ENDCOLOR}"
+echo -e "2.) Audio file                       ${CYAN} ## ${ENDCOLOR}" 
+echo -e "3.) Audio Playlist                   ${CYAN} ## ${ENDCOLOR}"
+echo -e "4.) ${MAGENTA}Update                           ${CYAN} ## ${ENDCOLOR}"
+echo -e "5.) Video Playlist                   ${CYAN} ## ${ENDCOLOR}"
+echo -e "6.) ${MAGENTA}Check size${ENDCOLOR} ${RED}(unstable)${ENDCOLOR}            ${CYAN} ## ${ENDCOLOR}"
+echo -e "                                     ${CYAN} ## ${ENDCOLOR}"   
+echo -e "${CYAN}########################################${ENDCOLOR}"
+#echo
+#echo -e "${YELLOW}Updated playlists will sync locally${ENDCOLOR}"
+echo
+read -n1 -p "Please select an option: " varUserInput
+echo
+
+standardOps=(yt-dlp.sh -q --progress --cookies-from-browser firefox)
+
+case $varUserInput in
+    1*) # Download a video/short
+        read -p "Please paste your URL: " url0
+        echo
+        echo -e "${CYAN}Saving content to:${ENDCOLOR} ${YELLOW}$PWD${ENDCOLOR}"
+        echo
+	
+	url="$url0"
+	final_command=("${standardOps[@]}" "$url0")
+	"${final_command[@]}"
+        
+	;;
+    2*) # Download audio (single file)
+        read -p "Please paste your URL: " url0
+        echo
+        echo -e "${CYAN}Saving content to:${ENDCOLOR} ${YELLOW}$PWD${ENDCOLOR}"
+        echo
+        
+	addOps="--extract-audio --audio-format mp3"
+	standardOps+=($addOps)
+	url="$url0"
+	final_command=("${standardOps[@]}" "$url0")
+	"${final_command[@]}"
+        
+	;;
+    3*) # Download an audio album
+        read -p "Please paste your playlist URL (audio only): " url0
+        echo
+        echo -e "${CYAN}Saving content to:${ENDCOLOR} ${YELLOW}$PWD${ENDCOLOR}"
+        echo
+        
+	addOps="--extract-audio --audio-format mp3 -i -o %(playlist_index)s-%(title)s.%(ext)s"
+	standardOps+=($addOps)
+	url="$url0"
+	final_command=("${standardOps[@]}" "$url0")
+	"${final_command[@]}"
+        
+	;;
+    4*) # Update
+	if yt-dlp.sh --update; then
+	    exit 0
+	else
+	    cd ~/bin/yt-dlp # git repo (local)
+	    git pull https://github.com/yt-dlp/yt-dlp.git # git repo (remote)
+	fi
+        
+	;;
+    5*) # Download video playlist
+        read -p "Please paste your playlist URL: " url0
+        echo
+        echo -e "${CYAN}Saving content to:${ENDCOLOR} ${YELLOW}$PWD${ENDCOLOR}"
+        echo
+        
+	addOps="-i -o %(playlist_index)s-%(title)s.%(ext)s"
+	standardOps+=($addOps)
+	url="$url0"
+	final_command=("${standardOps[@]}" "$url0")
+	"${final_command[@]}"
+        
+	;;
+    6*) # Checks the size of the download (files and playlists)
+	read -p "Please paste URL (single or playlist): " url0
+	echo
+	totalsize "$url0"
+	echo
+	
+	;;
+esac
